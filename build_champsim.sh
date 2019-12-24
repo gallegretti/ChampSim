@@ -19,6 +19,13 @@ NUM_CORE=$7         # tested up to 8-core system
 BOLD=$(tput bold)
 NORMAL=$(tput sgr0)
 #################################################
+echo "Branch: ${BRANCH}"
+echo "L1I_PREFETCHER: ${L1I_PREFETCHER}"
+echo "L1D_PREFETCHER: ${L1D_PREFETCHER}"
+echo "L2C_PREFETCHER: ${L2C_PREFETCHER}"
+echo "LLC_PREFETCHER: ${LLC_PREFETCHER}"
+echo "LLC_REPLACEMENT: ${LLC_REPLACEMENT}"
+echo "NUM_CORE: ${NUM_CORE}"
 
 # Sanity check
 if [ ! -f ./branch/${BRANCH}.bpred ]; then
@@ -50,7 +57,7 @@ if [ ! -f ./prefetcher/${L2C_PREFETCHER}.l2c_pref ]; then
 fi
 
 if [ ! -f ./prefetcher/${LLC_PREFETCHER}.llc_pref ]; then
-    echo "[ERROR] Cannot find LLC prefetcher"
+    echo "[ERROR] Cannot find LLC prefetcher ${LLC_PREFETCHER}"
 	echo "[ERROR] Possible LLC prefetchers from prefetcher/*.llc_pref "
     find prefetcher -name "*.llc_pref"
     exit 1

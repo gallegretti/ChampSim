@@ -5,4 +5,9 @@
 ./build_champsim.sh hashed_perceptron next_line next_line kpcp next_line drrip 1
 
 # Custom components
-./build_champsim.sh bimodal no no l2c_stride no lru 1
+
+# Prefetcher
+./build_champsim.sh bimodal next_line next_line 1_way_l2c_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 2_way_l2c_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 4_way_l2c_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 8_way_l2c_stride no lru 1

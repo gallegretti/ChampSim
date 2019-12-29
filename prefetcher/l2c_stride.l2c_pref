@@ -1,0 +1,129 @@
+#include "cache.h"
+
+#ifndef PREFETCH_TABLE_SIZE
+    #define PREFETCH_TABLE_SIZE 256
+#endif
+
+#ifndef PREFETCH_TABLE_SIZE_BITS
+    #define PREFETCH_TABLE_SIZE_BITS 8
+#endif
+
+enum table_entry_state {
+    init,
+    steady,
+    transient,
+    no_pred
+};
+
+struct table_entry {
+    uint64_t tag;
+    uint64_t prev_addr;
+    uint64_t stride;
+    table_entry_state state;
+};
+
+table_entry prefetch_table[PREFETCH_TABLE_SIZE];
+
+uint64_t addr_mask;
+
+void CACHE::l2c_prefetcher_initialize() 
+{
+    cout << "CPU " << cpu << " L2C stride prefetcher" << endl;
+    for (int i = 0; i < PREFETCH_TABLE_SIZE; i++)
+    {
+        prefetch_table[i].tag = 0;
+        prefetch_table[i].prev_addr = 0;
+        prefetch_table[i].stride = 0;
+        prefetch_table[i].state = table_entry_state::no_pred;
+    }
+    addr_mask = (PREFETCH_TABLE_SIZE_BITS + 1) - 1;
+}
+
+uint32_t CACHE::l2c_prefetcher_operate(uint64_t addr, uint64_t ip, uint8_t cache_hit, uint8_t type, uint32_t metadata_in)
+{
+    // Calculates tag of load/store instruction
+    uint64_t addr_tag = ip & addr_mask;
+    if (prefetch_table[addr_tag].tag == addr_tag)
+    {
+        // Instruction is on the table
+        table_entry& entry = prefetch_table[addr_tag];
+        if (addr == entry.prev_addr + entry.stride)
+        {
+            // Access was predicted correctly
+            switch (entry.state)
+            {
+            // B.2 (b) Moving to/being in a steady state
+            case table_entry_state::init:
+            case table_entry_state::transient:
+            case table_entry_state::steady:
+            {
+                entry.prev_addr = addr;
+                entry.state = table_entry_state::steady;
+                // Do prefetch
+                uint64_t prefetch_addr = entry.prev_addr + entry.stride;
+                uint64_t prefetch_block = prefetch_addr >> LOG2_BLOCK_SIZE;
+                prefetch_line(ip, addr, prefetch_block, FILL_L2, 0);
+            }
+                break;
+            // B.2 (e) No prediction state is over; back to transient
+            case table_entry_state::no_pred:
+                entry.prev_addr = addr;
+                entry.state = table_entry_state::transient;
+            }
+        }
+        else
+        {
+            // Acces was predicted incorrect
+            switch (entry.state)
+            {
+            // B.2 (a) Transition
+            case table_entry_state::init:
+                entry.stride = addr - entry.prev_addr;
+                entry.prev_addr = addr;
+                entry.state = table_entry_state::transient;
+                break;
+            // B.2 (c) Steady state is over, back to initialization
+            case table_entry_state::steady:
+                entry.prev_addr = addr;
+                entry.state = table_entry_state::init;
+                break;
+            // B.2 (d) Detection of irregular pattern
+            case table_entry_state::transient:
+                entry.stride = addr - entry.prev_addr;
+                entry.prev_addr = addr;
+                break;
+            // B.2 (f) Irregular pattern
+            case table_entry_state::no_pred:
+                entry.stride = addr - entry.prev_addr;
+                entry.prev_addr = addr;
+                entry.state = table_entry_state::no_pred;
+                break;
+            }
+        }
+    }
+    else
+    {
+        // If there's not corresponding entry, the instruction is entered in the table,
+        // prev_addr is set to addr, stride to 0 and state to initial
+        table_entry& entry = prefetch_table[addr_tag]; 
+        if (entry.state == table_entry_state::no_pred)
+        {
+            entry.stride = 0;
+            entry.prev_addr = addr;
+            entry.tag = addr_tag;
+            entry.state = table_entry_state::init;
+        }
+    }
+
+    return metadata_in;
+}
+
+uint32_t CACHE::l2c_prefetcher_cache_fill(uint64_t addr, uint32_t set, uint32_t way, uint8_t prefetch, uint64_t evicted_addr, uint32_t metadata_in)
+{
+  return metadata_in;
+}
+
+void CACHE::l2c_prefetcher_final_stats()
+{
+    cout << "CPU " << cpu << " L2C stride prefetcher final stats" << endl;
+}

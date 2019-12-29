@@ -92,7 +92,6 @@ uint32_t CACHE::l2c_prefetcher_operate(uint64_t addr, uint64_t ip, uint8_t cache
     uint64_t addr_tag = ip & addr_mask;
 
     int index = -1;
-    int valid_ip_tracker_index = -1;
     if (trackers[addr_tag].ip == ip) {
         index = addr_tag;
     }
@@ -101,7 +100,7 @@ uint32_t CACHE::l2c_prefetcher_operate(uint64_t addr, uint64_t ip, uint8_t cache
         if (trackers[index].ip == ip)
             break;
     }
-    
+    int valid_ip_tracker_index = index;
 
     // this is a new IP that doesn't have a tracker yet, so allocate one
     if (index == -1) {

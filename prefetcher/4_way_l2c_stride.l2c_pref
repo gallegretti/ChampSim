@@ -1,4 +1,4 @@
-// 1-Way
+// 4-Way
 #define IP_TRACKER_N_WAY_BITS 2
 
 // 1024 entries

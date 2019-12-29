@@ -11,3 +11,4 @@
 ./build_champsim.sh bimodal next_line next_line 2_way_l2c_stride no lru 1
 ./build_champsim.sh bimodal next_line next_line 4_way_l2c_stride no lru 1
 ./build_champsim.sh bimodal next_line next_line 8_way_l2c_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 1024_way_l2c_stride no lru 1

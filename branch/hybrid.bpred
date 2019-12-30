@@ -1,0 +1,89 @@
+#include "ooo_cpu.h"
+
+#define BIMODAL_TABLE_SIZE 16384
+#define BIMODAL_PRIME 16381
+#define MAX_COUNTER 3
+// Branch History Table & Loop Detection
+#define LOCAL_HISTORY_TABLE_SIZE 64
+int bimodal_table[NUM_CPUS][BIMODAL_TABLE_SIZE];
+int local_history_table[NUM_CPUS][LOCAL_HISTORY_TABLE_SIZE][5];
+int oldestEntry[NUM_CPUS];
+
+void O3_CPU::initialize_branch_predictor()
+{
+    int i;
+    cout << "CPU " << cpu << "Hybrid Predictor" << endl;
+
+    // Local History - Loop detector & BHT
+    for(i = 0; i < LOCAL_HISTORY_TABLE_SIZE; i++){
+        local_history_table[cpu][i][0] = -1; // address tag
+        local_history_table[cpu][i][1] = 0; // prediction counter
+        local_history_table[cpu][i][2] = 0; // LEB confidence
+        local_history_table[cpu][i][3] = 0; // LEB TripCounter
+        local_history_table[cpu][i][4] = 0; // LEB IterCounter
+    }
+    for (i = 0; i < NUM_CPUS; i++){
+      oldestEntry[i] = 0;
+    }
+    //DHT
+    for(i = 0; i < BIMODAL_TABLE_SIZE; i++)
+        bimodal_table[cpu][i] = 0;
+}
+
+uint8_t O3_CPU::predict_branch(uint64_t ip)
+{
+    int indx;
+    uint8_t prediction;
+    // Try to find entry in Local History
+    for(indx = 0; indx < LOCAL_HISTORY_TABLE_SIZE; indx++){
+      if (local_history_table[cpu][indx][0] == ip){
+        // Perform LEB branch prediction if confidence is at 2 (i.e 2 consecutive loops of the same size)
+        if (local_history_table[cpu][indx][2] == 2){
+          prediction = local_history_table[cpu][indx][3] == local_history_table[cpu][indx][4] ? 0 : 1;
+        }
+        // Else, perform BHT branch prediction
+        else {
+          prediction = (local_history_table[cpu][indx][1] >= ((MAX_COUNTER + 1)/2)) ? 1 : 0;
+        }
+        return prediction;
+      }
+    }
+    // Replacing Oldest History
+    local_history_table[cpu][oldestEntry[cpu]][0] = ip;
+    oldestEntry[cpu]++;
+    if (oldestEntry[cpu] == LOCAL_HISTORY_TABLE_SIZE) oldestEntry[cpu] = 0;
+    // Performing Bimodal / DHT Algorithm since entry wasn't in Local History
+    uint32_t hash = ip % BIMODAL_PRIME;
+    prediction = (bimodal_table[cpu][hash] >= ((MAX_COUNTER + 1)/2)) ? 1 : 0;
+    return prediction;
+}
+
+void O3_CPU::last_branch_result(uint64_t ip, uint8_t taken)
+{
+    int indx;
+    uint32_t hash = ip % BIMODAL_PRIME;
+    for(indx = 0; indx < LOCAL_HISTORY_TABLE_SIZE; indx++){
+      if (local_history_table[cpu][indx][0] == ip){
+        if (taken && (local_history_table[cpu][indx][1] < MAX_COUNTER)){
+            local_history_table[cpu][indx][1]++;
+            local_history_table[cpu][indx][4]++;
+          }
+        else if ((taken == 0) && (local_history_table[cpu][indx][1] > 0))
+            local_history_table[cpu][indx][1]--;
+            if (local_history_table[cpu][indx][3] == local_history_table[cpu][indx][4]){
+              local_history_table[cpu][indx][2]++;
+            }
+            else{
+              local_history_table[cpu][indx][3] = local_history_table[cpu][indx][4];
+            }
+            local_history_table[cpu][indx][4] = 0;
+        break;
+      }
+    }
+    if (indx == LOCAL_HISTORY_TABLE_SIZE){
+      if (taken && (bimodal_table[cpu][hash] < MAX_COUNTER))
+          bimodal_table[cpu][hash]++;
+      else if ((taken == 0) && (bimodal_table[cpu][hash] > 0))
+          bimodal_table[cpu][hash]--;
+    }
+}

@@ -1,5 +1,5 @@
-// 2-Way
-#define IP_TRACKER_N_WAY_BITS 1
+// 1024-Way
+#define IP_TRACKER_N_WAY_BITS 8
 
 // 1024 entries
 #define IP_TRACKER_COUNT 1024

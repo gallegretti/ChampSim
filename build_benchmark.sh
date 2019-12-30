@@ -7,8 +7,23 @@
 # Custom components
 
 # Prefetcher
+
+# No l2c prefetcher
+./build_champsim.sh bimodal next_line next_line no no lru 1
+
+# n-way config
 ./build_champsim.sh bimodal next_line next_line 1_way_l2c_stride no lru 1
-./build_champsim.sh bimodal next_line next_line 2_way_l2c_stride no lru 1
 ./build_champsim.sh bimodal next_line next_line 4_way_l2c_stride no lru 1
-./build_champsim.sh bimodal next_line next_line 8_way_l2c_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 16_way_l2c_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 64_way_l2c_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 256_way_l2c_stride no lru 1
 ./build_champsim.sh bimodal next_line next_line 1024_way_l2c_stride no lru 1
+
+# table size config
+./build_champsim.sh bimodal next_line next_line 1_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 4_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 16_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 64_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 256_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 1024_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line 4096_entries_stride no lru 1

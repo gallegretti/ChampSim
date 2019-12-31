@@ -2,8 +2,8 @@
 #define IP_TRACKER_N_WAY_BITS 10
 
 // 2048 entries
-#define IP_TRACKER_COUNT 64
-#define IP_TRACKER_COUNT_BITS 6
+#define IP_TRACKER_COUNT 128
+#define IP_TRACKER_COUNT_BITS 7
 
 #include "n_way_l2c_stride.l2c_pref"
 

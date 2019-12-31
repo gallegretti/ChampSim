@@ -20,10 +20,11 @@
 ./build_champsim.sh bimodal next_line next_line 1024_way_l2c_stride no lru 1
 
 # table size config
-./build_champsim.sh bimodal next_line next_line 1_entries_stride no lru 1
-./build_champsim.sh bimodal next_line next_line 4_entries_stride no lru 1
-./build_champsim.sh bimodal next_line next_line 16_entries_stride no lru 1
-./build_champsim.sh bimodal next_line next_line 64_entries_stride no lru 1
-./build_champsim.sh bimodal next_line next_line 256_entries_stride no lru 1
-./build_champsim.sh bimodal next_line next_line 1024_entries_stride no lru 1
-./build_champsim.sh bimodal next_line next_line 4096_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line ipt_2_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line ipt_8_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line ipt_32_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line ipt_128_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line ipt_512_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line ipt_1024_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line ipt_2048_entries_stride no lru 1
+./build_champsim.sh bimodal next_line next_line ipt_4096_entries_stride no lru 1

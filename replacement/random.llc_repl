@@ -1,6 +1,8 @@
 #include <random>
 #include "cache.h"
 
+std::queue<int> CACHE::m_fifo = std::queue<int>();
+
 // initialize replacement state
 void CACHE::llc_initialize_replacement()
 {

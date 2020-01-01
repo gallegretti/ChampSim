@@ -1,6 +1,8 @@
 #include <queue>
 #include "cache.h"
 
+std::queue<int> CACHE::m_fifo = std::queue<int>();
+
 // initialize replacement state
 void CACHE::llc_initialize_replacement()
 {
@@ -31,12 +33,14 @@ uint32_t CACHE::fifo_victim(uint32_t cpu, uint64_t instr_id, uint32_t set, const
 	// If queue is not full
 	if (m_fifo.size() < NUM_WAY)
 	{
-		m_fifo.push(way);
+		CACHE::m_fifo.push(way);
 	}
 	// Queue full
 	else
 	{
-		way = m_fifo.pop();
+		way = CACHE::m_fifo.front();
+		CACHE::m_fifo.pop();
+		CACHE::m_fifo.push(way);
 	}
 
 	return way;

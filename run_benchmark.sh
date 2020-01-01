@@ -1,11 +1,16 @@
 DIR="./results/"
 
+IFS=+
 [ ! -d $DIR ] && mkdir -p $DIR
 
+BINARGS="-warmup_instructions 50000000 -simulation_instructions 200000000 -traces "
+
+#Generate all commands to be run
+COMMANDS=()
 for trace in ./dpc3_traces/*; do
 	for bin in ./bin/*; do
-		# 50 million warmup, 200 million simulation
-		echo "Running $bin with trace $trace"
-		gnome-terminal -- bash -c "$bin -warmup_instructions 50000000 -simulation_instructions 200000000 -traces $trace &> $DIR$(basename $bin)_TRACE_$(basename $trace).txt; bash" &
+		COMMANDS+=("$bin $BINARGS $trace &> $DIR$(basename $bin)_TRACE_$(basename $trace).txt+")
 	done
 done
+
+parallel -j 8 eval {} ::: ${COMMANDS[@]}

@@ -32,6 +32,7 @@ def genericPlot(barWidth, allBars, allColors, allLabels, xlabel):
     # Set position of bar on X axis
     r1 = np.arange(len(allBars[0]))
     allPositions = [r1]
+
     for i in range(1, len(allBars)):
         allPositions.append([x + barWidth for x in allPositions[i-1]])
 
@@ -39,14 +40,14 @@ def genericPlot(barWidth, allBars, allColors, allLabels, xlabel):
     for i in range(len(allBars)):
         plt.bar(allPositions[i], allBars[i], color=allColors[i], width=barWidth, edgecolor='white', label=allLabels[i])
     
+    # Set axis
     plt.yscale('log')
-    # Add xticks on the middle of the group bars
+    plt.ylabel('cycles', fontweight='bold')
     plt.xlabel(xlabel, fontweight='bold')
     plt.xticks([], [])
 
-    # Create legend & Show graphic
+    # Create legend
     plt.legend()
-    plt.show()
 
 def prefetcherPlot(data, key, labelfn):
     # Prefetcher
@@ -97,6 +98,10 @@ def main():
     else:
         # Add plotters here
         print('Unknown plotter')
+
+    plt.tight_layout()
+    plt.show()
+    #plt.savefig(path + 'plot.png')
 
 if __name__ == "__main__":
     main()
